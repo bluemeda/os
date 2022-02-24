@@ -20,7 +20,7 @@ export architecture="arm64"
 export codename="focal"
 export channel="daily"
 
-version=6.0
+version=6.1
 YYYYMMDD="$(date +%Y%m%d)"
 imagename=elementaryos-$version-$channel-rpi-$YYYYMMDD
 
@@ -234,8 +234,8 @@ xz -T0 -z "${basedir}/${imagename}.img"
 
 cd "${basedir}"
 
-md5sum "${imagename}.img.xz" > "${imagename}.md5.txt"
-sha256sum "${imagename}.img.xz" > "${imagename}.sha256.txt"
+md5sum "${imagename}.img.xz" | tee "${imagename}.md5.txt"
+sha256sum "${imagename}.img.xz" | tee "${imagename}.sha256.txt"
 
 cd "${rootdir}"
 
