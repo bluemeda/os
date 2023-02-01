@@ -16,7 +16,7 @@ fi
 
 lb config noauto \
     --architectures "$ARCH" \
-    --mode ubuntu \
+    --mode debian \
     --initramfs none \
     --distribution "$BASECODENAME" \
     --parent-distribution "$BASECODENAME" \
@@ -46,6 +46,7 @@ lb config noauto \
     --firmware-binary false \
     --firmware-chroot false \
     --zsync false \
+    --security true \
     "${@}"
 
 # replace channel and suite
