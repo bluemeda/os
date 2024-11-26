@@ -17,9 +17,9 @@
 
 <p align="center">
   <img src="https://github.com/elementary/os/workflows/stable/badge.svg" alt="Stable">
-  <img src="https://github.com/elementary/os/actions/workflows/daily-7.0.yml/badge.svg" alt="Daily 7.0">
-  <img src="https://github.com/elementary/os/actions/workflows/daily-6.1-arm.yml/badge.svg" alt="Daily 7.0">
-  
+  <img src="https://github.com/elementary/os/actions/workflows/daily-8.0.yml/badge.svg" alt="Daily 8.0">
+  <img src="https://github.com/elementary/os/actions/workflows/daily-arm.yml/badge.svg" alt="Daily ARM">
+
 </p>
 
 ---
@@ -35,30 +35,33 @@ The following examples assume you have Docker correctly installed and set up, an
 Configure the channel in the `etc/terraform.conf` (stable, daily), then run:
 
 ```sh
-docker run --privileged -i -v /proc:/proc \
+docker run --rm --privileged -it \
+    -v /proc:/proc \
     -v ${PWD}:/working_dir \
     -w /working_dir \
     debian:latest \
-    /bin/bash -s etc/terraform.conf < build.sh
+    ./build.sh etc/terraform.conf
 ```
 
 ### Raspberry Pi 4
 
 ```sh
-docker run --privileged -i -v /proc:/proc \
+docker run --rm --privileged -it \
+    -v /proc:/proc \
     -v ${PWD}:/working_dir \
     -w /working_dir \
-    ubuntu:20.04 \
+    ubuntu:24.04 \
     ./build-rpi.sh
 ```
 
 ### Pinebook Pro
 
 ```sh
-docker run --privileged -i -v /proc:/proc \
+docker run --rm --privileged -it \
+    -v /proc:/proc \
     -v ${PWD}:/working_dir \
     -w /working_dir \
-    ubuntu:20.04 \
+    ubuntu:24.04 \
     ./build-pinebookpro.sh
 ```
 

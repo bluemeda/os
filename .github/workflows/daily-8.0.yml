@@ -1,4 +1,4 @@
-name: daily-7.0
+name: Daily OS 8
 
 on:
   push:
@@ -20,8 +20,8 @@ jobs:
 
     steps:
     - name: Clone build scripts
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Build and upload daily .iso
       run: |
-        ./workflows.sh etc/terraform-daily-7.0-azure.conf "${{ secrets.key }}" "${{ secrets.secret }}" "${{ secrets.endpoint }}" "${{ secrets.bucket }}"
+        ./workflows.sh etc/terraform-daily-8.0-azure.conf "${{ secrets.key }}" "${{ secrets.secret }}" "${{ secrets.endpoint }}" "${{ secrets.bucket }}"

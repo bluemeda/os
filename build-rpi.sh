@@ -17,13 +17,14 @@ free_space="500"
 
 export packages="elementary-minimal elementary-desktop elementary-standard"
 export architecture="arm64"
-export codename="focal"
+export codename="noble"
 export channel="daily"
 
-version=6.1
+version=8.0
 YYYYMMDD="$(date +%Y%m%d)"
 imagename=elementaryos-$version-$channel-rpi-$YYYYMMDD
 
+rm -rf "${basedir}"
 mkdir -p "${basedir}"
 cd "${basedir}"
 
@@ -107,7 +108,7 @@ cat << EOF > elementary-$architecture/hardware
 # we'll recreate it on the actual partition later
 mkdir -p /boot/firmware
 
-apt-get --yes install linux-image-raspi linux-firmware-raspi2 pi-bluetooth
+apt-get --yes install linux-image-raspi
 
 # Symlink to workaround bug with Bluetooth driver looking in the wrong place for firmware
 ln -s /lib/firmware /etc/firmware
@@ -141,18 +142,6 @@ install -m 644 -o root -g root "${rootdir}/pinebookpro/files/resizerootfs.servic
 mkdir -p "elementary-$architecture/etc/systemd/system/systemd-remount-fs.service.requires/"
 ln -s /etc/systemd/system/resizerootfs.service "elementary-$architecture/etc/systemd/system/systemd-remount-fs.service.requires/resizerootfs.service"
 
-
-# Support for kernel updates on the Pi 400
-cat << EOF >> elementary-$architecture/etc/flash-kernel/db
-
-Machine: Raspberry Pi 400 Rev 1.0
-Method: pi
-Kernel-Flavors: raspi raspi2
-DTB-Id: bcm2711-rpi-4-b.dtb
-U-Boot-Script-Name: bootscr.rpi
-Required-Packages: u-boot-tools
-EOF
-
 # Calculate the space to create the image.
 root_size=$(du -s -B1K elementary-$architecture | cut -f1)
 raw_size=$(($((free_space*1024))+root_size))
@@ -172,7 +161,7 @@ parted "${imagename}.img" --script -- mkpart primary ext4 256 -1
 
 # Set the partition variables
 loopdevice=$(losetup -f --show "${basedir}/${imagename}.img")
-device=$(kpartx -va "$loopdevice" | sed -E 's/.*(loop[0-9])p.*/\1/g' | head -1)
+device=$(kpartx -va "$loopdevice" | sed -E 's/.*(loop[0-9]+)p.*/\1/g' | head -1)
 device="/dev/mapper/${device}"
 bootp=${device}p1
 rootp=${device}p2
@@ -192,7 +181,7 @@ mount -o bind "${basedir}/bootp/" elementary-$architecture/boot/firmware
 # Copy Raspberry Pi specific files
 cp -r "${rootdir}"/rpi/rootfs/system-boot/* elementary-${architecture}/boot/firmware/
 
-# Copy kernels and firemware to boot partition
+# Copy kernels and firmware to boot partition
 cat << EOF > elementary-$architecture/hardware
 #!/bin/bash
 
@@ -210,7 +199,7 @@ chmod +x elementary-$architecture/hardware
 LANG=C chroot elementary-$architecture /hardware
 
 # Grab some updated firmware from the Raspberry Pi foundation
-git clone -b '1.20201022' --single-branch --depth 1 https://github.com/raspberrypi/firmware raspi-firmware
+git clone -b 'stable' --single-branch --depth 1 https://github.com/raspberrypi/firmware raspi-firmware
 cp raspi-firmware/boot/*.elf "${basedir}/bootp/"
 cp raspi-firmware/boot/*.dat "${basedir}/bootp/"
 cp raspi-firmware/boot/bootcode.bin "${basedir}/bootp/"
@@ -246,11 +235,7 @@ BUCKET="$4"
 IMGPATH="${basedir}"/${imagename}.img.xz
 IMGNAME=${channel}-rpi/$(basename "$IMGPATH")
 
-apt-get install -y curl python3 python3-distutils
-
-curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-python3 get-pip.py
-pip install boto3
+apt-get install -y python3 python3-boto3
 
 ./upload-ia3.sh "$KEY" "$SECRET" "$ENDPOINT" "$BUCKET" "$IMGPATH" "$IMGNAME" || exit 1
 
